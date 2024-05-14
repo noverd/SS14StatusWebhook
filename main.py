@@ -29,14 +29,17 @@ async def gen_embed_from_api() -> tuple[bool, DiscordEmbed | None]:
         if r.status_code != 200:
             return False, None
         json_obj: dict = r.json()
-    embed: DiscordEmbed = DiscordEmbed(title=json_obj["name"],
-                                       description=
-                                       f"*Количество игроков:* **{json_obj["players"]}**\n"
-                                       f"*Карта:* **{json_obj["map"]}**\n"
-                                       f"*ID-Раунда:* **{json_obj["round_id"]}**\n"
-                                       + f"*Раунд идет уже:* **{time_elapsed_since(json_obj["round_start_time"])}**\n"
-                                       if "round_start_time" in json_obj else "",
-                                       color="03b2f8")
+    embed = DiscordEmbed(
+        title=json_obj["name"],
+        description=(
+                f"*Количество игроков:* **{json_obj['players']}**\n"
+                f"*Карта:* **{json_obj['map']}**\n"
+                f"*ID-Раунда:* **{json_obj['round_id']}**\n"
+                + (f"*Раунд идет уже:* **{time_elapsed_since(json_obj['round_start_time'])}**\n"
+                   if "round_start_time" in json_obj else "")
+        ),
+        color="03b2f8"
+    )
     return True, embed
 
 
