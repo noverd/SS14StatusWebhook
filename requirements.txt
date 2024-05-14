@@ -1,0 +1,2 @@
+apscheduler
+discord_webhook[async]
