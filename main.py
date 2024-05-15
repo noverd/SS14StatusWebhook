@@ -6,7 +6,7 @@ import webhook_ctx
 from httpx import AsyncClient, Response
 from pathlib import Path
 
-webhook_url: str = Path("webhook_url").read_text()
+webhook_url: str = Path("webhook_url").read_text().strip()
 server_url: str = Path("server_url").read_text()
 
 
