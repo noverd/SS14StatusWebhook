@@ -1,3 +1,3 @@
-from discord_webhook import DiscordWebhook
+from discord_webhook import AsyncDiscordWebhook
 
-webhook: DiscordWebhook | None = None
+webhook: AsyncDiscordWebhook | None = None
