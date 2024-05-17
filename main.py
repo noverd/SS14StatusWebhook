@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from discord_webhook import AsyncDiscordWebhook, DiscordEmbed
-import asyncio
+from asyncio import get_event_loop, run, sleep
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import webhook_ctx
 from httpx import AsyncClient, Response
@@ -10,9 +10,8 @@ webhook_url: str = Path("webhook_url").read_text().strip()
 server_url: str = Path("server_url").read_text()
 
 
-
 def time_elapsed_since(time_string: str) -> str:
-    time_string = time_string[:19] + 'Z'
+    time_string = f'{time_string[:19]}Z'
     time_difference: timedelta = datetime.now(timezone.utc) - datetime.strptime(time_string, "%Y-%m-%dT%H:%M:%S%z")
     hours: float
     remainder: float
@@ -25,7 +24,7 @@ def time_elapsed_since(time_string: str) -> str:
 
 async def gen_embed_from_api() -> tuple[bool, DiscordEmbed | None]:
     async with AsyncClient() as client:
-        r: Response = await client.get(server_url + '/status')
+        r: Response = await client.get(f'{server_url}/status')
         if r.status_code != 200:
             return False, None
         json_obj: dict = r.json()
@@ -44,8 +43,10 @@ async def gen_embed_from_api() -> tuple[bool, DiscordEmbed | None]:
 
 
 async def tick():
+    await sleep(1.5)
     if webhook_ctx.webhook is not None:
         await webhook_ctx.webhook.delete()
+    await sleep(1.5)
     webhook_ctx.webhook = AsyncDiscordWebhook(url=webhook_url)
     embed: tuple[bool, DiscordEmbed | None] = await gen_embed_from_api()
     if not embed[0]:
@@ -66,8 +67,8 @@ if __name__ == '__main__':
     scheduler.start()
 
     try:
-        asyncio.get_event_loop().run_forever()
+        get_event_loop().run_forever()
     except BaseException as e:
         if webhook_ctx.webhook is not None:
-            asyncio.run(webhook_ctx.webhook.delete())
+            run(webhook_ctx.webhook.delete())
         print(e)
