@@ -44,18 +44,22 @@ async def gen_embed_from_api() -> tuple[bool, DiscordEmbed | None]:
 
 async def tick():
     await sleep(1.5)
-    if webhook_ctx.webhook is not None:
-        await webhook_ctx.webhook.delete()
-    await sleep(1.5)
-    webhook_ctx.webhook = AsyncDiscordWebhook(url=webhook_url)
     embed: tuple[bool, DiscordEmbed | None] = await gen_embed_from_api()
     if not embed[0]:
         print("Error while fetching status from api")
-    webhook_ctx.webhook.add_embed(embed[1])
-
-    response = await webhook_ctx.webhook.execute()
-    if response.status_code != 200:
-        print("Error while sending webhook")
+    if webhook_ctx.webhook is None:
+        webhook_ctx.webhook = AsyncDiscordWebhook(url=webhook_url)
+        webhook_ctx.webhook.add_embed(embed[1])
+        response = await webhook_ctx.webhook.execute()
+        if response.status_code != 200:
+            print("Error while sending webhook")
+        else:
+            webhook_ctx.webhook.message_id = response.json()['id']
+    else:
+        webhook_ctx.webhook.embeds = [embed[1]]
+        response = await webhook_ctx.webhook.edit()
+        if response.status_code != 200:
+            print(f"Error while editing webhook: {response.content}")
 
 
 if __name__ == '__main__':
