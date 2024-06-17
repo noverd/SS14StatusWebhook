@@ -59,7 +59,7 @@ async def tick():
         webhook_ctx.webhook.embeds = [embed[1]]
         response = await webhook_ctx.webhook.edit()
         if response.status_code != 200:
-            print("Error while editing webhook")
+            print(f"Error while editing webhook: {response.content}")
 
 
 if __name__ == '__main__':
